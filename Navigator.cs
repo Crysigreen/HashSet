@@ -8,19 +8,19 @@ namespace HashSet
 {
     internal class Navigator : INavigator
     {
-        private readonly HashSet<Route> routesHashSet;
-        private readonly RHashSet<Route> routesHashSet1;
+        private readonly HashSet<Route> routesHashSet1;
+        private readonly RHashSet<Route> routesHashSet;
 
         public Navigator()
         {
-            routesHashSet = new HashSet<Route>();
-            routesHashSet1 = new RHashSet<Route>();
+            routesHashSet1 = new HashSet<Route>();
+            routesHashSet = new RHashSet<Route>();
         }
 
         public void AddRoute(Route route)
         {
+            //routesHashSet.Add(route);
             routesHashSet.Add(route);
-            routesHashSet1.Add(route);
         }
 
         public void RemoveRoute(string routeId)
@@ -54,7 +54,7 @@ namespace HashSet
 
         public Route GetRoute(string routeId)
         {
-            foreach (var route in routesHashSet1)
+            foreach (var route in routesHashSet)
             {
                 if (route.Id == routeId)
                 {
@@ -81,7 +81,7 @@ namespace HashSet
 
         public IEnumerable<Route> searchRoutes(string startPoint, string endPoint)
         {
-            var matchingRoutes = routesHashSet
+            var matchingRoutes = routesHashSet1
                 .Where(r => r.LocationPoints.First() == startPoint && r.LocationPoints.Last() == endPoint)
                 .ToList();
 

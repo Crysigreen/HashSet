@@ -19,20 +19,11 @@
             //Route route6 = new Route("6", 200, 5, false, new List<string> { "City1", "City2", "City3", "City4" });
             //Route route7 = new Route("7", 100, 2, true, new List<string> { "City1", "City2" });
 
-            routes.Add(route1);
-            routes1.Add(route1);
-            routes.Add(route6);
-            routes1.Add(route6);
-            routes.Add(route2);
-            routes1.Add(route2);
-            routes.Add(route3);
-            routes1.Add(route3);
-            Console.WriteLine(routes.Contains(route1));
-            routes.Remove(route6);
-            routes1.Remove(route6);
+            navigator.AddRoute(route1);
+            navigator.AddRoute(route2);
+            navigator.AddRoute(route3);
 
-            routes.Clear();
-            routes1.Clear();
+            navigator.RemoveRoute("3");
 
             
             Console.WriteLine(HashHelpers.GetPrime(0));

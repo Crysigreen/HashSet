@@ -19,19 +19,6 @@ namespace HashSet
 
         public const int HashPrime = 101;
 
-        //Table of prime numbers to use as hash table sizes.
-        //A typical resize algorithm would pick the smallest prime number in this array
-        // that is larger than twice the previous capacity.
-        // Suppose our Hashtable currently has capacity x and enough elements are added
-        // such that a resize needs to occur. Resizing first computes 2x then finds the
-        // first prime in the table greater than 2x, i.e. if primes are ordered
-        // p_1, p_2, ..., p_i, ..., it finds p_n such that p_n-1 < 2x<p_n.
-        // Doubling is important for preserving the asymptotic complexity of the
-        // hashtable operations such as add.Having a prime guarantees that double
-        // hashing does not lead to infinite loops.IE, your hash function will be
-        // h1(key) + i* h2(key), 0 <= i<size.h2 and the size must be relatively prime.
-        // We prefer the low computation costs of higher prime numbers over the increased
-        // memory allocation of a fixed prime number i.e.when right sizing a HashSet.
         private static readonly ImmutableArray<int> s_primes = ImmutableArray.Create(
             3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
             1103, 1327, 1597, 1931, 2333, 2801, 3371, 4049, 4861, 5839, 7013, 8419, 10103, 12143, 14591,
@@ -74,7 +61,7 @@ namespace HashSet
         }
     }
 
-    internal class RHashSet<T>
+    internal class RHashSet<T> : IEnumerable<T>
     {
         private int[]? _buckets;
         private Entry[]? _entries;
@@ -86,11 +73,11 @@ namespace HashSet
 
         private const int StartOfFreeList = -3;
 
-        public RHashSet( IEqualityComparer<T>? comparer = null)
+        public RHashSet(IEqualityComparer<T>? comparer = null)
         {
             Initialize(0);
             _comparer = comparer ?? EqualityComparer<T>.Default;
-            
+
         }
         /// <summary>
         /// Структура, представляющая элемент хэш-таблицы
@@ -322,14 +309,82 @@ namespace HashSet
             return size;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public Enumerator GetEnumerator() => new Enumerator(this);
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
+            Count == 0 ? SZGenericArrayEnumerator<T>.Empty :
+            GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
+
+
+        public struct Enumerator : IEnumerator<T>
         {
-            foreach (var entry in _entries)
+            private readonly RHashSet<T> _hashSet;
+            private readonly int _version;
+            private int _index;
+            private T _current;
+
+            internal Enumerator(RHashSet<T> hashSet)
             {
-                yield return entry.Value;
+                _hashSet = hashSet;
+                _version = hashSet._version;
+                _index = 0;
+                _current = default!;
+            }
+
+            public bool MoveNext()
+            {
+                if (_version != _hashSet._version)
+                {
+                    throw new InvalidOperationException("_InvalidOperation_EnumFailedVersion()");
+                }
+
+                // Use unsigned comparison since we set index to dictionary.count+1 when the enumeration ends.
+                // dictionary.count+1 could be negative if dictionary.count is int.MaxValue
+                while ((uint)_index < (uint)_hashSet._count)
+                {
+                    ref Entry entry = ref _hashSet._entries![_index++];
+                    if (entry.Next >= -1)
+                    {
+                        _current = entry.Value;
+                        return true;
+                    }
+                }
+
+                _index = _hashSet._count + 1;
+                _current = default!;
+                return false;
+            }
+
+            public T Current => _current;
+
+            public void Dispose() { }
+
+            object? IEnumerator.Current
+            {
+                get
+                {
+                    if (_index == 0 || (_index == _hashSet._count + 1))
+                    {
+                        throw new InvalidOperationException("_InvalidOperation_EnumFailedVersion()");
+                    }
+
+                    return _current;
+                }
+            }
+
+            void IEnumerator.Reset()
+            {
+                if (_version != _hashSet._version)
+                {
+                    throw new InvalidOperationException("_InvalidOperation_EnumFailedVersion()");
+                }
+
+                _index = 0;
+                _current = default!;
             }
         }
-
 
     }
 }
