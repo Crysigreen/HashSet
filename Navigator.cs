@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,18 @@ namespace HashSet
         public void AddRoute(Route route)
         {
             //routesHashSet.Add(route);
+            foreach (var rout in routesHashSet)
+            {
+
+                var t = Equals(route, rout);
+                if (t)
+                {
+                    Console.WriteLine(t);
+                    return;
+                }
+                
+            }
+
             routesHashSet.Add(route);
         }
 
