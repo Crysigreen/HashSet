@@ -90,7 +90,7 @@ namespace HashSet
         {
             Initialize(0);
             _comparer = comparer ?? EqualityComparer<T>.Default;
-            //_freeList = StartOfFreeList;
+            
         }
         /// <summary>
         /// Структура, представляющая элемент хэш-таблицы
