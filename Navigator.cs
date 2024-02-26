@@ -81,7 +81,7 @@ namespace HashSet
 
         public IEnumerable<Route> searchRoutes(string startPoint, string endPoint)
         {
-            var matchingRoutes = routesHashSet1
+            var matchingRoutes = routesHashSet
                 .Where(r => r.LocationPoints.First() == startPoint && r.LocationPoints.Last() == endPoint)
                 .ToList();
 

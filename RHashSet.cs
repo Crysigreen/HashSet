@@ -312,7 +312,7 @@ namespace HashSet
         public Enumerator GetEnumerator() => new Enumerator(this);
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() =>
-            Count == 0 ? SZGenericArrayEnumerator<T>.Empty :
+            Count == 0 ? Enumerable.Empty<T>().GetEnumerator() :
             GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
