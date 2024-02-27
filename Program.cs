@@ -70,8 +70,11 @@
             Route route3 = new Route("3", 120, 1, true, new List<string> { "City2", "City4" });
             Route route4 = new Route("4", 80, 4, false, new List<string> { "City3", "City1", "City4", "City4" });
             Route route5 = new Route("5", 200, 5, false, new List<string> { "City4", "City1" });
-            Route route6 = new Route("6", 200, 5, false, new List<string> { "City1", "City2", "City3", "City4" });
+            Route route6 = new Route("6", 210, 5, false, new List<string> { "City1", "City2", "City3", "City4" });
             Route route7 = new Route("7", 100, 2, true, new List<string> { "City1", "City2" });
+            Route route8 = new Route("8", 150, 2, true, new List<string> { "City1", "City4", "City9" });
+            Route route9 = new Route("9", 210, 5, true, new List<string> { "City1", "City7", "City10" });
+
 
 
             navigator.AddRoute(route1);
@@ -81,6 +84,8 @@
             navigator.AddRoute(route5);
             navigator.AddRoute(route6);
             navigator.AddRoute(route7);
+            navigator.AddRoute(route8);
+            navigator.AddRoute(route9);
 
 
             Console.WriteLine("Size : " + navigator.Size());

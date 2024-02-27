@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Diagnostics;
 using System.Collections.Immutable;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -51,7 +52,6 @@ namespace HashSet
                     return prime;
             }
 
-            // Outside of our predefined table. Compute the hard way.
             for (var i = (min | 1); i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))
@@ -79,17 +79,12 @@ namespace HashSet
             _comparer = comparer ?? EqualityComparer<T>.Default;
 
         }
-        /// <summary>
-        /// Структура, представляющая элемент хэш-таблицы
-        /// </summary>
+        
         private struct Entry
         {
-            /// <summary>
-            /// HashCode элемента
-            /// </summary>
-            public int HashCode;    // Хэш-код элемента
-            public T Value;         // Значение элемента
-            public int Next;        // Ссылка на следующий элемент в случае коллизии
+            public int HashCode;    
+            public T Value;         
+            public int Next;        
         }
 
         private ref int GetBucketIndex(int hashCode)
@@ -130,13 +125,10 @@ namespace HashSet
                 int last = -1;
 
                 IEqualityComparer<T>? comparer = _comparer;
-                int hashCode =
-                    typeof(T).IsValueType && comparer == null ? item!.GetHashCode() :
-                    item is not null ? comparer!.GetHashCode(item) :
-                    0;
+                int hashCode = item != null ? item.GetHashCode() : 0;
 
                 ref int bucket = ref GetBucketIndex(hashCode);
-                int i = bucket - 1; // Value in buckets is 1-based
+                int i = bucket - 1;
 
                 while (i >= 0)
                 {
@@ -146,7 +138,7 @@ namespace HashSet
                     {
                         if (last < 0)
                         {
-                            bucket = entry.Next + 1; // Value in buckets is 1-based
+                            bucket = entry.Next + 1; 
                         }
                         else
                         {
@@ -169,12 +161,7 @@ namespace HashSet
                     i = entry.Next;
 
                     collisionCount++;
-                    if (collisionCount > (uint)entries.Length)
-                    {
-                        // The chain of entries forms a loop; which means a concurrent update has happened.
-                        // Break out of the loop and throw, rather than looping forever.
-                        throw new InvalidOperationException("Concurrent operations are not supported");
-                    }
+                    
                 }
             }
 
@@ -196,26 +183,23 @@ namespace HashSet
             uint collisionCount = 0;
             ref int bucket = ref Unsafe.NullRef<int>();
 
-            hashCode = value != null ? comparer.GetHashCode(value) : 0;
+            hashCode = value != null ? value.GetHashCode() : 0;
             bucket = ref GetBucketIndex(hashCode);
-            int i = bucket - 1; // Value in _buckets is 1-based
+            int i = bucket - 1;
 
             while (i >= 0)
             {
                 ref Entry entry = ref entries[i];
-                if (entry.HashCode == hashCode && comparer.Equals(entry.Value, value))
+                if (entry.HashCode == hashCode && Equals(entry.Value, value))
                 {
                     return;
                 }
                 i = entry.Next;
 
                 collisionCount++;
-                if (collisionCount > entries.Length)
-                {
-                    // The chain of entries forms a loop, which means a concurrent update has happened.
-                    throw new InvalidOperationException("Concurrent operations are not supported");
-                }
+                
             }
+
 
             int index;
             if (_freeCount > 0)
@@ -240,7 +224,7 @@ namespace HashSet
             {
                 ref Entry entry = ref entries![index];
                 entry.HashCode = hashCode;
-                entry.Next = bucket - 1; // Value in _buckets is 1-based
+                entry.Next = bucket - 1;
                 entry.Value = value;
                 bucket = index + 1;
                 _version++;
@@ -259,8 +243,8 @@ namespace HashSet
                 int collisionCount = 0;
                 IEqualityComparer<T>? comparer = _comparer;
 
-                int hashCode = item != null ? comparer.GetHashCode(item) : 0;
-                int i = GetBucketIndex(hashCode) - 1; // Value in _buckets is 1-based
+                int hashCode = item != null ? item.GetHashCode() : 0;
+                int i = GetBucketIndex(hashCode) - 1;
                 while (i >= 0)
                 {
                     ref Entry entry = ref entries[i];
@@ -271,11 +255,7 @@ namespace HashSet
                     i = entry.Next;
 
                     collisionCount++;
-                    if (collisionCount > (uint)entries.Length)
-                    {
-                        // The chain of entries forms a loop, which means a concurrent update has happened.
-                        throw new InvalidOperationException("Concurrent operations are not supported");
-                    }
+                    
                 }
             }
             return false;
@@ -340,8 +320,6 @@ namespace HashSet
                     throw new InvalidOperationException("_InvalidOperation_EnumFailedVersion()");
                 }
 
-                // Use unsigned comparison since we set index to dictionary.count+1 when the enumeration ends.
-                // dictionary.count+1 could be negative if dictionary.count is int.MaxValue
                 while ((uint)_index < (uint)_hashSet._count)
                 {
                     ref Entry entry = ref _hashSet._entries![_index++];

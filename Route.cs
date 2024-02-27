@@ -30,15 +30,20 @@ namespace HashSet
 
             Route otherRoute = (Route)obj;
 
-            return LocationPoints.First() == otherRoute.LocationPoints.First() &&
+            return Id == otherRoute.Id ||
+               (LocationPoints.First() == otherRoute.LocationPoints.First() &&
                LocationPoints.Last() == otherRoute.LocationPoints.Last() &&
-               Distance == otherRoute.Distance;
+               Distance == otherRoute.Distance);
         }
 
 
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            int hash = 17;
+            hash = hash * 23 + LocationPoints.First().GetHashCode();
+            hash = hash * 23 + LocationPoints.Last().GetHashCode();
+            hash = hash * 23 + Distance.GetHashCode();
+            return hash;
         }
     }
 }

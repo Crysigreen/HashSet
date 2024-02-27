@@ -9,30 +9,15 @@ namespace HashSet
 {
     internal class Navigator : INavigator
     {
-        private readonly HashSet<Route> routesHashSet1;
         private readonly RHashSet<Route> routesHashSet;
 
         public Navigator()
         {
-            routesHashSet1 = new HashSet<Route>();
             routesHashSet = new RHashSet<Route>();
         }
 
         public void AddRoute(Route route)
         {
-            //routesHashSet.Add(route);
-            foreach (var rout in routesHashSet)
-            {
-
-                var t = Equals(route, rout);
-                if (t)
-                {
-                    Console.WriteLine(t);
-                    return;
-                }
-                
-            }
-
             routesHashSet.Add(route);
         }
 
@@ -140,7 +125,7 @@ namespace HashSet
                 .OrderByDescending(r => r.Popularity)
                 .ThenBy(r => r.Distance)
                 .ThenBy(r => r.LocationPoints.Count)
-                .Take(3)
+                .Take(4)
                 .ToList();
         }
 
